@@ -1,10 +1,12 @@
 package hellojpa;
 
+import hellojpa.cascade.Child;
+import hellojpa.cascade.Parent;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class JpaMain {
@@ -15,15 +17,25 @@ public class JpaMain {
         EntityTransaction tx = em.getTransaction();
         tx.begin();
         try{
-            Member member = new Member();
-            member.setName("user");
-            member.setCreateBy("kim");
-            member.setCreateDate(LocalDateTime.now());
-            em.persist(member);
+            Parent parent = new Parent();
+            Child child1 = new Child();
+            Child child2 = new Child();
+
+            parent.addChild(child1);
+            parent.addChild(child2);
+
+            em.persist(parent);
+
+            em.flush();
+            em.clear();
+
+            Parent findParent = em.find(Parent.class, parent.getId());
+            findParent.getChildList().remove(0);
+
 
             tx.commit();
         }catch (Exception e){
-            System.out.println("예외발생");
+            e.printStackTrace();
             tx.rollback();
         }finally {
             em.close();
@@ -32,4 +44,5 @@ public class JpaMain {
 
         emf.close();
     }
+
 }
